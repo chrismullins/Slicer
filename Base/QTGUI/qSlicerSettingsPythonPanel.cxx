@@ -96,6 +96,8 @@ void qSlicerSettingsPythonPanelPrivate::init()
 
   this->ScrollBarPolicyComboBox->setCurrentIndex(this->PythonConsole->scrollBarPolicy());
 
+  this->pythonFontButton->setCurrentFont(this->PythonConsole->getShellFont());
+
   //
   // Connect panel widgets with associated slots
   //
@@ -124,6 +126,11 @@ void qSlicerSettingsPythonPanelPrivate::init()
   QObject::connect(this->ScrollBarPolicyComboBox, SIGNAL(currentIndexChanged(int)),
                    q, SLOT(onScrollBarPolicyChanged(int)));
 
+  QObject::connect(this->pythonFontButton, SIGNAL(currentFontChanged(QFont)),
+                   q, SLOT(onFontChanged(QFont)));
+
+
+
   //
   // Register settings with their corresponding widgets
   //
@@ -151,6 +158,11 @@ void qSlicerSettingsPythonPanelPrivate::init()
 
   q->registerProperty("Python/ScrollBarPolicy", this->ScrollBarPolicyComboBox, "currentIndex",
                       SIGNAL(currentIndexChanged(int)));
+
+  q->registerProperty("Python/Font", this->pythonFontButton, "currentFont",
+                      SIGNAL(currentFontChanged(QFont)));
+
+
 }
 
 // --------------------------------------------------------------------------
@@ -225,3 +237,13 @@ void qSlicerSettingsPythonPanel::onScrollBarPolicyChanged(int index)
   Q_D(qSlicerSettingsPythonPanel);
   d->PythonConsole->setScrollBarPolicy(static_cast<Qt::ScrollBarPolicy>(index));
 }
+
+#include <QDebug>
+// --------------------------------------------------------------------------
+void qSlicerSettingsPythonPanel::onFontChanged(const QFont& font)
+{
+  Q_D(qSlicerSettingsPythonPanel);
+    qDebug()  << "onFontChanged" << font;
+  d->PythonConsole->setShellFont(font);
+}
+
