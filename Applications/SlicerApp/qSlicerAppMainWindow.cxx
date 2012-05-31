@@ -27,6 +27,7 @@
 #include <QTimer>
 #include <QToolButton>
 #include <QMenu>
+#include <QSignalMapper>
 
 #include "qSlicerApplication.h" // Indirectly includes vtkSlicerConfigure.h
 #include "vtkSlicerConfigure.h" // For Slicer_USE_PYTHONQT and Slicer_USE_QtTesting
@@ -61,6 +62,7 @@
 #include "qSlicerAppMainWindowCore.h"
 #include "qSlicerModuleSelectorToolBar.h"
 #include "qSlicerIOManager.h"
+#include "qSlicerSettingsGeneralPanel.h"
 
 // qMRML includes
 #include <qMRMLSliceWidget.h>
@@ -86,6 +88,7 @@ public:
   qSlicerAppMainWindowPrivate(qSlicerAppMainWindow& object);
   void setupUi(QMainWindow * mainWindow);
 
+  void writeRecentFiles();
   void readSettings();
   void writeSettings();
   bool confirmClose();
@@ -94,6 +97,8 @@ public:
   qSlicerModuleSelectorToolBar* ModuleSelectorToolBar;
   QStringList                   FavoriteModules;
   qSlicerLayoutManager*         LayoutManager;
+  QStringList                   RecentlyLoadedFiles;
+  QStringList                   FilesLoaded;
 
 #ifdef Slicer_BUILD_EXTENSIONMANAGER_SUPPORT
   qSlicerExtensionsManagerDialog* ExtensionsManagerDialog;
@@ -406,6 +411,13 @@ void qSlicerAppMainWindowPrivate::readSettings()
     }
   settings.endGroup();
   this->FavoriteModules << settings.value("Modules/FavoriteModules").toStringList();
+
+  this->RecentlyLoadedFiles << settings.value("RecentlyLoaded/Files").toStringList();
+  for (int i=0; i < this->RecentlyLoadedFiles.count(); ++i)
+    {
+    menuRecently_Loaded->addAction(this->RecentlyLoadedFiles.at(i), q, SLOT(loadRecent()));
+    }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -421,6 +433,38 @@ void qSlicerAppMainWindowPrivate::writeSettings()
     settings.setValue("windowState", q->saveState());
     settings.setValue("layout", this->LayoutManager->layout());
     }
+  settings.endGroup();
+  writeRecentFiles();
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerAppMainWindowPrivate::writeRecentFiles()
+{
+  QSettings settings;
+  qSlicerCoreApplication* app;
+  QStringList loadedFileNames;
+
+  settings.beginGroup("RecentlyLoaded");
+  loadedFileNames = app->application()->coreIOManager()->returnLoadedFileNames();
+  while (this->RecentlyLoadedFiles.count() > settings.value("NumberToKeep").toInt())
+    {
+    this->RecentlyLoadedFiles.removeAt(0);
+    }
+  if (!loadedFileNames.isEmpty())
+    {
+    for (int i = 0; i < loadedFileNames.count(); ++i)
+      {
+      if (!this->RecentlyLoadedFiles.contains(loadedFileNames.at(i)))
+        {
+        if (this->RecentlyLoadedFiles.count()==settings.value("NumberToKeep").toInt())
+          {
+          this->RecentlyLoadedFiles.removeAt(0);
+          }
+        this->RecentlyLoadedFiles.append(loadedFileNames.at(i));
+        }
+      }
+    }
+  settings.setValue("Files", this->RecentlyLoadedFiles);
   settings.endGroup();
 }
 
@@ -482,6 +526,19 @@ qSlicerModuleSelectorToolBar* qSlicerAppMainWindow::moduleSelector()const
 {
   Q_D(const qSlicerAppMainWindow);
   return d->ModuleSelectorToolBar;
+}
+
+//-----------------------------------------------------------------------------
+bool qSlicerAppMainWindow::loadRecent()
+{
+  qSlicerApplication* app;
+  QAction* filename = qobject_cast<QAction*>(this->sender());
+  qSlicerIO::IOProperties ioProperties;
+  QStringList filenames;
+  filenames.append(filename->text());
+  ioProperties["objectName"] = "AddDataDialog";
+  ioProperties["filename"] = filenames;
+  return app->application()->ioManager()->openDialog(qSlicerIO::NoFile, qSlicerFileDialog::Read, ioProperties);
 }
 
 //-----------------------------------------------------------------------------

@@ -23,6 +23,7 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QSettings>
+#include <QSpinBox>
 
 // CTK includes
 #include <ctkBooleanMapper.h>
@@ -69,6 +70,10 @@ void qSlicerSettingsGeneralPanelPrivate::init()
                    q, SLOT(onShowToolTipsToggled(bool)));
   QObject::connect(this->ShowToolButtonTextCheckBox, SIGNAL(toggled(bool)),
                    q, SLOT(onShowToolButtonTextToggled(bool)));
+  QObject::connect(this->SlicerNumRecentlyLoaded, SIGNAL(valueChanged(int)),
+                   q, SLOT(onNumRecentFilesChanged(int)));
+  QObject::connect(this->ClearRecentlyLoadedButton, SIGNAL(clicked()),
+                   q, SLOT(onClearRecentFilesClicked()));
 
   // Default values
   this->SlicerWikiURLLineEdit->setText("http://www.slicer.org/slicerWiki/index.php");
@@ -95,6 +100,8 @@ void qSlicerSettingsGeneralPanelPrivate::init()
                       exitMapper, "valueAsInt", SIGNAL(valueAsIntChanged(int)));
   q->registerProperty("SlicerWikiURL", this->SlicerWikiURLLineEdit, "text",
                       SIGNAL(textChanged(QString)));
+  q->registerProperty("RecentlyLoaded/NumberToKeep", this->SlicerNumRecentlyLoaded, "value", SIGNAL(valueChanged(int)));
+  q->registerProperty("clearHistory", this->ClearRecentlyLoadedButton, "down", SIGNAL(clicked()));
 }
 
 // --------------------------------------------------------------------------
@@ -137,4 +144,21 @@ void qSlicerSettingsGeneralPanel::onShowToolButtonTextToggled(bool enable)
       mainWindow->setToolButtonStyle(enable ? Qt::ToolButtonTextUnderIcon : Qt::ToolButtonIconOnly);
       }
     }
+}
+
+// --------------------------------------------------------------------------
+void qSlicerSettingsGeneralPanel::onNumRecentFilesChanged(int newNumber)
+{
+  QSettings settings;
+  settings.beginGroup("RecentlyLoaded");
+  settings.setValue("NumberToKeep", newNumber);
+  settings.endGroup();
+}
+// --------------------------------------------------------------------------
+void qSlicerSettingsGeneralPanel::onClearRecentFilesClicked()
+{
+  QSettings settings;
+  settings.beginGroup("RecentlyLoaded");
+  settings.setValue("Files", "");
+  settings.endGroup();
 }

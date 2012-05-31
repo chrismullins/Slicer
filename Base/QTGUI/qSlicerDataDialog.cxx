@@ -411,7 +411,14 @@ void qSlicerDataDialog::dropEvent(QDropEvent *event)
 bool qSlicerDataDialog::exec(const qSlicerIO::IOProperties& readerProperties)
 {
   Q_D(qSlicerDataDialog);
-  Q_ASSERT(!readerProperties.contains("fileName"));
+  if (readerProperties.contains("fileName"))
+    {
+    QStringList fileNames = readerProperties["fileName"].toStringList();
+    for (int i = 0; i < fileNames.count(); ++i)
+      {
+      d->addFile(QFileInfo(fileNames.at(i)));
+      }
+    }
 
   bool res = false;
   if (d->exec() != QDialog::Accepted)

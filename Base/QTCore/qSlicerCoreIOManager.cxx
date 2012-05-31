@@ -305,7 +305,7 @@ bool qSlicerCoreIOManager::loadNodes(const qSlicerIO::IOFileType& fileType,
     success = true;
     break;
     }
-
+  this->LoadedFileNames << parameters["fileName"].toString();
   if (loadedNodes)
     {
     foreach(const QString& node, nodes)
@@ -316,6 +316,12 @@ bool qSlicerCoreIOManager::loadNodes(const qSlicerIO::IOFileType& fileType,
     }
 
   return success;
+}
+
+//-----------------------------------------------------------------------------
+QStringList qSlicerCoreIOManager::returnLoadedFileNames() const
+{
+  return this->LoadedFileNames;
 }
 
 //-----------------------------------------------------------------------------
