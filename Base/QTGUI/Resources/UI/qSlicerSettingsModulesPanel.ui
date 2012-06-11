@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
-    <height>538</height>
+    <width>735</width>
+    <height>610</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,7 +46,7 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="ctkDirectoryButton" name="TemporaryDirectoryButton"/>
+    <widget class="ctkDirectoryButton" name="TemporaryDirectoryButton" native="true"/>
    </item>
    <item row="4" column="0">
     <widget class="QLabel" name="AdditionalModulePathsLabel">
@@ -110,9 +110,9 @@
       <item>
        <widget class="ctkExpandButton" name="AdditionalModulePathMoreButton">
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
-        <property name="mirrorOnExpand">
+        <property name="mirrorOnExpand" stdset="0">
          <bool>true</bool>
         </property>
        </widget>
@@ -152,7 +152,7 @@
        <property name="alternatingRowColors">
         <bool>false</bool>
        </property>
-       <property name="checkBoxVisible">
+       <property name="checkBoxVisible" stdset="0">
         <bool>true</bool>
        </property>
       </widget>
@@ -180,19 +180,10 @@
           <property name="checked">
            <bool>true</bool>
           </property>
-          <property name="buttonTextAlignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="indicatorAlignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="checkState">
-           <enum>Qt::Checked</enum>
-          </property>
-          <property name="checkBoxControlsButton">
+          <property name="checkBoxControlsButton" stdset="0">
            <bool>false</bool>
           </property>
-          <property name="checkBoxUserCheckable">
+          <property name="checkBoxUserCheckable" stdset="0">
            <bool>false</bool>
           </property>
          </widget>
@@ -211,16 +202,10 @@
           <property name="checked">
            <bool>true</bool>
           </property>
-          <property name="buttonTextAlignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="indicatorAlignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="checkBoxControlsButton">
+          <property name="checkBoxControlsButton" stdset="0">
            <bool>false</bool>
           </property>
-          <property name="checkBoxUserCheckable">
+          <property name="checkBoxUserCheckable" stdset="0">
            <bool>false</bool>
           </property>
          </widget>
@@ -355,7 +340,7 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="showSearchIcon">
+          <property name="showSearchIcon" stdset="0">
            <bool>true</bool>
           </property>
          </widget>
@@ -379,9 +364,9 @@
      <item>
       <widget class="ctkExpandButton" name="FilterMoreButton">
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
-       <property name="mirrorOnExpand">
+       <property name="mirrorOnExpand" stdset="0">
         <bool>true</bool>
        </property>
       </widget>
@@ -391,7 +376,7 @@
    <item row="7" column="0">
     <widget class="QLabel" name="HomeModuleLabel">
      <property name="text">
-      <string>Home:</string>
+      <string>Default Startup Module:</string>
      </property>
     </widget>
    </item>
@@ -514,9 +499,9 @@
      <item>
       <widget class="ctkExpandButton" name="FavoritesMoreButton">
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
-       <property name="mirrorOnExpand">
+       <property name="mirrorOnExpand" stdset="0">
         <bool>true</bool>
        </property>
       </widget>
@@ -578,6 +563,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ctkSettingsPanel</class>
+   <extends>QWidget</extends>
+   <header>ctkSettingsPanel.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>qSlicerModulesListView</class>
    <extends>QListView</extends>
    <header>qSlicerModulesListView.h</header>
@@ -601,12 +592,6 @@
    <class>ctkSearchBox</class>
    <extends>QLineEdit</extends>
    <header>ctkSearchBox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ctkSettingsPanel</class>
-   <extends>QWidget</extends>
-   <header>ctkSettingsPanel.h</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
    <class>qSlicerDirectoryListView</class>
