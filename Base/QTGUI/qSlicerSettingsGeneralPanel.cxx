@@ -23,17 +23,18 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QSettings>
+#include <QSpinBox>
 
 // CTK includes
 #include <ctkBooleanMapper.h>
 
 // QtGUI includes
 #include "qSlicerApplication.h"
+#include "qSlicerCoreIOManager.h"
 #include "qSlicerSettingsGeneralPanel.h"
 #include "ui_qSlicerSettingsGeneralPanel.h"
 
 #include "vtkSlicerConfigure.h" // For Slicer_QM_OUTPUT_DIRS
-
 // --------------------------------------------------------------------------
 // qSlicerSettingsGeneralPanelPrivate
 
@@ -82,6 +83,8 @@ void qSlicerSettingsGeneralPanelPrivate::init()
                    q, SLOT(onShowToolTipsToggled(bool)));
   QObject::connect(this->ShowToolButtonTextCheckBox, SIGNAL(toggled(bool)),
                    q, SLOT(onShowToolButtonTextToggled(bool)));
+  QObject::connect(this->ClearRecentlyLoadedButton, SIGNAL(clicked()),
+                   q, SLOT(onClearRecentFilesClicked()));
 
   // Default values
   this->SlicerWikiURLLineEdit->setText("http://www.slicer.org/slicerWiki/index.php");
@@ -112,6 +115,7 @@ void qSlicerSettingsGeneralPanelPrivate::init()
                       SIGNAL(currentLanguageNameChanged(const QString&)),
                       "Enable/Disable languages",
                       ctkSettingsPanel::OptionRequireRestart);
+  q->registerProperty("RecentlyLoadedFiles/NumberToKeep", this->NumOfRecentlyLoadedFiles, "value", SIGNAL(valueChanged(int)));
 }
 
 // --------------------------------------------------------------------------
@@ -154,4 +158,13 @@ void qSlicerSettingsGeneralPanel::onShowToolButtonTextToggled(bool enable)
       mainWindow->setToolButtonStyle(enable ? Qt::ToolButtonTextUnderIcon : Qt::ToolButtonIconOnly);
       }
     }
+}
+
+// --------------------------------------------------------------------------
+void qSlicerSettingsGeneralPanel::onClearRecentFilesClicked()
+{
+  QSettings settings;
+  settings.beginGroup("RecentlyLoadedFiles");
+  settings.clear();
+  settings.endGroup();
 }

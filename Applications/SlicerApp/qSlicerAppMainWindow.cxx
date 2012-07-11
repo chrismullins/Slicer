@@ -27,6 +27,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QShowEvent>
+#include <QSignalMapper>
 #include <QTimer>
 #include <QToolButton>
 
@@ -60,6 +61,7 @@
 #include "qSlicerAppMainWindowCore.h"
 #include "qSlicerModuleSelectorToolBar.h"
 #include "qSlicerIOManager.h"
+#include "qSlicerSettingsGeneralPanel.h"
 
 // qMRML includes
 #include <qMRMLSliceWidget.h>
@@ -87,14 +89,20 @@ public:
 
   void readSettings();
   void writeSettings();
+
+  void readRecentlyLoadedFiles();
+  void writeRecentlyLoadedFiles();
+
   bool confirmClose();
 
   qSlicerAppMainWindowCore*        Core;
-  qSlicerModuleSelectorToolBar* ModuleSelectorToolBar;
-  QStringList                   FavoriteModules;
-  qSlicerLayoutManager*         LayoutManager;
+  qSlicerModuleSelectorToolBar*  ModuleSelectorToolBar;
+  QStringList                    FavoriteModules;
+  qSlicerLayoutManager*          LayoutManager;
+  QList<qSlicerIO::IOProperties> RecentlyLoadedFiles;
+  QStringList                    LoadedFiles;
 
-  QByteArray                    StartupState;
+  QByteArray                     StartupState;
 };
 
 //-----------------------------------------------------------------------------
@@ -397,6 +405,8 @@ void qSlicerAppMainWindowPrivate::readSettings()
     }
   settings.endGroup();
   this->FavoriteModules << settings.value("Modules/FavoriteModules").toStringList();
+
+  this->readRecentlyLoadedFiles();
 }
 
 //-----------------------------------------------------------------------------
@@ -412,6 +422,62 @@ void qSlicerAppMainWindowPrivate::writeSettings()
     settings.setValue("windowState", q->saveState());
     settings.setValue("layout", this->LayoutManager->layout());
     }
+  settings.endGroup();
+  this->writeRecentlyLoadedFiles();
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerAppMainWindowPrivate::readRecentlyLoadedFiles()
+{
+  Q_Q(qSlicerAppMainWindow);
+
+  QSettings settings;
+  int size = settings.beginReadArray("RecentlyLoadedFiles/RecentFiles");
+  if (size == 0)
+    {
+    menuRecentlyLoaded->setEnabled(false);
+    }
+  for(int i = 0; i < size; ++i)
+    {
+    settings.setArrayIndex(i);
+    QVariant file = settings.value(QString("File").append(QString::number(i)));
+    this->RecentlyLoadedFiles.append(file.toMap());
+    QString fileName = file.toMap().find("fileName").value().toString();
+    menuRecentlyLoaded->addAction(fileName, q, SLOT(loadRecent()));
+    }
+  settings.endArray();
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerAppMainWindowPrivate::writeRecentlyLoadedFiles()
+{
+  QSettings settings;
+  qSlicerCoreApplication* app = qSlicerCoreApplication::application();
+  settings.beginGroup("RecentlyLoadedFiles");
+  QList<qSlicerIO::IOProperties> fileList = app-> application()->coreIOManager()->loadedFileProperties();
+  QList<qSlicerIO::IOProperties> previouslyLoadedFiles = this->RecentlyLoadedFiles;
+  for(int i = 0; i < fileList.size()/2; i++)
+    {
+    fileList.swap(i,fileList.size()-(1+i));
+    }
+  QList<qSlicerIO::IOProperties> updatedLoadedFiles = fileList + previouslyLoadedFiles;
+  foreach(qSlicerIO::IOProperties file, updatedLoadedFiles)
+    {
+    if (updatedLoadedFiles.count(file) > 1)
+      {
+      updatedLoadedFiles.removeOne(file);
+      }
+    }
+  int fileLimit = settings.value("NumberToKeep").toInt();
+  int fileListSize = updatedLoadedFiles.size();
+  int menuSize = (fileLimit < fileListSize ) ? fileLimit : fileListSize;
+  settings.beginWriteArray("RecentFiles");
+  for (int i = 0; i < menuSize; ++i)
+    {
+    settings.setArrayIndex(i);
+    settings.setValue(QString("File").append(QString::number(i)), updatedLoadedFiles.at(i));
+    }
+  settings.endArray();
   settings.endGroup();
 }
 
@@ -515,6 +581,33 @@ qSlicerModuleSelectorToolBar* qSlicerAppMainWindow::moduleSelector()const
 {
   Q_D(const qSlicerAppMainWindow);
   return d->ModuleSelectorToolBar;
+}
+
+//-----------------------------------------------------------------------------
+bool qSlicerAppMainWindow::loadRecent()
+{
+  qSlicerApplication* app = qSlicerApplication::application();
+  QAction* loadRecentFilenameAction = qobject_cast<QAction*>(this->sender());
+  QString fileName = loadRecentFilenameAction->text();
+  bool loadSuccess = false;
+
+  QSettings settings;
+  int size = settings.beginReadArray("RecentlyLoadedFiles/RecentFiles");
+  for(int i = 0; i < size; ++i)
+    {
+    settings.setArrayIndex(i);
+    QVariant file = settings.value(QString("File").append(QString::number(i)));
+    QMap<QString, QVariant> fileMap = file.value< qSlicerIO::IOProperties >();
+    QString fileNameCandidate = fileMap.find("fileName").value().toString();
+    if (fileNameCandidate == fileName)
+      {
+      qSlicerIO::IOProperties fileProperties = file.toMap();
+      qSlicerIO::IOFileType fileType = static_cast<qSlicerIO::IOFileType>(fileProperties.find("fileType").value().toInt());
+      loadSuccess = app->application()->coreIOManager()->loadNodes(fileType, fileProperties);
+      }
+    }
+  settings.endArray();
+  return loadSuccess;
 }
 
 //-----------------------------------------------------------------------------

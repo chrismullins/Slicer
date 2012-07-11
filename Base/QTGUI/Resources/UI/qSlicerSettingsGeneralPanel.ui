@@ -60,6 +60,9 @@
      <property name="checked">
       <bool>true</bool>
      </property>
+     <property name="tristate">
+      <bool>false</bool>
+     </property>
     </widget>
    </item>
    <item row="7" column="0">
@@ -134,6 +137,40 @@
     <widget class="QLabel" name="LanguageLabel">
      <property name="text">
       <string>Language</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="1">
+    <widget class="QSpinBox" name="NumOfRecentlyLoadedFiles">
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>10</number>
+     </property>
+     <property name="value">
+      <number>10</number>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0">
+    <widget class="QLabel" name="NumOfRecentlyLoadedFilesLabel">
+     <property name="text">
+      <string>Number of files to keep in 'Recently Loaded'</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0">
+    <widget class="QLabel" name="ClearRecentlyLoadedLabel">
+     <property name="text">
+      <string>Clear Recently Loaded File List:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1">
+    <widget class="QPushButton" name="ClearRecentlyLoadedButton">
+     <property name="text">
+      <string>Clear</string>
      </property>
     </widget>
    </item>

@@ -22,8 +22,10 @@
 #define __qSlicerCoreIOManager_h
 
 // Qt includes
-#include <QObject>
+#include <QList>
 #include <QMap>
+#include <QObject>
+#include <QVariantMap>
 
 // CTK includes
 #include <ctkPimpl.h>
@@ -46,6 +48,9 @@ class Q_SLICER_BASE_QTCORE_EXPORT qSlicerCoreIOManager:public QObject
 public:
   qSlicerCoreIOManager(QObject* parent = 0);
   virtual ~qSlicerCoreIOManager();
+
+  QList<qSlicerIO::IOProperties> loadedFileProperties() const;
+  QStringList loadedFileNames()const;
 
   /// Return the file type associated with a \a file
   Q_INVOKABLE qSlicerIO::IOFileType fileType(const QString& file)const;

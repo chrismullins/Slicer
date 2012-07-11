@@ -51,6 +51,7 @@ public:
   QList<qSlicerFileReader*> Readers;
   QList<qSlicerFileWriter*> Writers;
   QMap<qSlicerIO::IOFileType, QStringList> FileTypes;
+  QList<qSlicerIO::IOProperties> LoadedFiles;
 };
 
 //-----------------------------------------------------------------------------
@@ -301,6 +302,9 @@ bool qSlicerCoreIOManager::loadNodes(const qSlicerIO::IOFileType& fileType,
     }
   Q_ASSERT(!parameters["fileName"].toString().isEmpty());
 
+  qSlicerIO::IOProperties parametersWithFileType = parameters;
+  parametersWithFileType.insert("fileType", fileType);
+
   const QList<qSlicerFileReader*>& readers = this->readers(fileType);
 
   // If no readers were able to read and load the file(s), success will remain false
@@ -324,7 +328,7 @@ bool qSlicerCoreIOManager::loadNodes(const qSlicerIO::IOFileType& fileType,
     success = true;
     break;
     }
-
+  d->LoadedFiles << parametersWithFileType;
   if (loadedNodes)
     {
     foreach(const QString& node, nodes)
@@ -335,6 +339,26 @@ bool qSlicerCoreIOManager::loadNodes(const qSlicerIO::IOFileType& fileType,
     }
 
   return success;
+}
+
+//-----------------------------------------------------------------------------
+QList<qSlicerIO::IOProperties> qSlicerCoreIOManager::loadedFileProperties() const
+{
+  Q_D(const qSlicerCoreIOManager);
+  return d->LoadedFiles;
+}
+
+//-----------------------------------------------------------------------------
+QStringList qSlicerCoreIOManager::loadedFileNames() const
+{
+  Q_D(const qSlicerCoreIOManager);
+  QStringList loadedFileNames;
+  foreach(const qSlicerIO::IOProperties& properties, d->LoadedFiles)
+    {
+    Q_ASSERT(!properties["fileName"].toString().isEmpty());
+    loadedFileNames << properties["fileName"].toString();
+    }
+  return loadedFileNames;
 }
 
 //-----------------------------------------------------------------------------

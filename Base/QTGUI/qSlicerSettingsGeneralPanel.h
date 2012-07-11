@@ -51,6 +51,7 @@ protected slots:
   void onFontChanged(const QFont& font);
   void onShowToolTipsToggled(bool);
   void onShowToolButtonTextToggled(bool enable);
+  void onClearRecentFilesClicked();
 
 protected:
   QScopedPointer<qSlicerSettingsGeneralPanelPrivate> d_ptr;
