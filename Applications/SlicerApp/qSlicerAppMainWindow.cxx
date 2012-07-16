@@ -123,6 +123,17 @@ void qSlicerAppMainWindowPrivate::setupUi(QMainWindow * mainWindow)
 
   this->Ui_qSlicerAppMainWindow::setupUi(mainWindow);
 
+  ctkSettingsPanel* generalCTKSettingsPanel = qSlicerApplication::application()->settingsDialog()->panel(QString("General"));
+  qSlicerSettingsGeneralPanel* generalSettingsPanel = static_cast<qSlicerSettingsGeneralPanel*>(generalCTKSettingsPanel);
+  QObject::connect(generalSettingsPanel, SIGNAL(clearRecentFilesClicked()),
+                   q, SLOT(onClearRecentlyLoadedFilesTriggered()));
+  QObject::connect(generalSettingsPanel, SIGNAL(numberOfRecentlyLoadedFilesToKeepChanged()),
+                   q, SLOT(onNumberOfFilesToKeepChanged()));
+
+  qSlicerCoreIOManager* ioManager = qSlicerApplication::application()->coreIOManager();
+  QObject::connect(ioManager, SIGNAL(newFileLoaded()),
+                   q, SLOT(onPushNewRecentlyLoadedFileTriggered()));
+
   //----------------------------------------------------------------------------
   // ModulePanel
   //----------------------------------------------------------------------------
@@ -456,7 +467,7 @@ void qSlicerAppMainWindowPrivate::writeRecentlyLoadedFiles()
   settings.beginGroup("RecentlyLoadedFiles");
   QList<qSlicerIO::IOProperties> fileList = app-> application()->coreIOManager()->loadedFileProperties();
   QList<qSlicerIO::IOProperties> previouslyLoadedFiles = this->RecentlyLoadedFiles;
-  for(int i = 0; i < fileList.size()/2; i++)
+  for(int i = 0; i < fileList.size()/2; ++i)
     {
     fileList.swap(i,fileList.size()-(1+i));
     }
@@ -830,6 +841,34 @@ void qSlicerAppMainWindow::loadDICOMActionTriggered()
 void qSlicerAppMainWindow::onEditApplicationSettingsActionTriggered()
 {
   qSlicerApplication::application()->settingsDialog()->exec();
+}
+
+//---------------------------------------------------------------------------
+void qSlicerAppMainWindow::onClearRecentlyLoadedFilesTriggered()
+{
+  Q_D(qSlicerAppMainWindow);
+  d->menuRecentlyLoaded->setEnabled(false);
+}
+
+
+//---------------------------------------------------------------------------
+void qSlicerAppMainWindow::onPushNewRecentlyLoadedFileTriggered()
+{
+  Q_D(qSlicerAppMainWindow);
+  d->writeRecentlyLoadedFiles();
+  d->menuRecentlyLoaded->clear();
+  d->menuRecentlyLoaded->setEnabled(true);
+  d->readRecentlyLoadedFiles();
+}
+
+//---------------------------------------------------------------------------
+void qSlicerAppMainWindow::onNumberOfFilesToKeepChanged()
+{
+  Q_D(qSlicerAppMainWindow);
+  d->writeRecentlyLoadedFiles();
+  d->menuRecentlyLoaded->clear();
+  d->menuRecentlyLoaded->setEnabled(true);
+  d->readRecentlyLoadedFiles();
 }
 
 //---------------------------------------------------------------------------

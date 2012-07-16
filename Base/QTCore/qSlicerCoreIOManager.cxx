@@ -329,6 +329,7 @@ bool qSlicerCoreIOManager::loadNodes(const qSlicerIO::IOFileType& fileType,
     break;
     }
   d->LoadedFiles << parametersWithFileType;
+  emit newFileLoaded();
   if (loadedNodes)
     {
     foreach(const QString& node, nodes)

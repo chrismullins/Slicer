@@ -52,6 +52,11 @@ protected slots:
   void onShowToolTipsToggled(bool);
   void onShowToolButtonTextToggled(bool enable);
   void onClearRecentFilesClicked();
+  void onNumberOfFilesToKeepChanged();
+
+signals:
+  void clearRecentFilesClicked();
+  void numberOfRecentlyLoadedFilesToKeepChanged();
 
 protected:
   QScopedPointer<qSlicerSettingsGeneralPanelPrivate> d_ptr;

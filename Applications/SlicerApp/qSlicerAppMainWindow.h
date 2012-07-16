@@ -62,6 +62,9 @@ protected slots:
   void onModuleAboutToBeUnloaded(const QString& moduleName);
   void onEditApplicationSettingsActionTriggered();
   void onViewExtensionManagerActionTriggered();
+  void onClearRecentlyLoadedFilesTriggered();
+  void onPushNewRecentlyLoadedFileTriggered();
+  void onNumberOfFilesToKeepChanged();
 
   void onMRMLSceneModified(vtkObject*);
   void onLayoutActionTriggered(QAction* action);

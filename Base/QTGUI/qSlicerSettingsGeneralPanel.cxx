@@ -85,6 +85,8 @@ void qSlicerSettingsGeneralPanelPrivate::init()
                    q, SLOT(onShowToolButtonTextToggled(bool)));
   QObject::connect(this->ClearRecentlyLoadedButton, SIGNAL(clicked()),
                    q, SLOT(onClearRecentFilesClicked()));
+  QObject::connect(this->NumOfRecentlyLoadedFiles, SIGNAL(valueChanged(int)),
+                   q, SLOT(onNumberOfFilesToKeepChanged()));
 
   // Default values
   this->SlicerWikiURLLineEdit->setText("http://www.slicer.org/slicerWiki/index.php");
@@ -167,4 +169,11 @@ void qSlicerSettingsGeneralPanel::onClearRecentFilesClicked()
   settings.beginGroup("RecentlyLoadedFiles");
   settings.clear();
   settings.endGroup();
+  emit clearRecentFilesClicked();
+}
+
+// --------------------------------------------------------------------------
+void qSlicerSettingsGeneralPanel::onNumberOfFilesToKeepChanged()
+{
+  emit numberOfRecentlyLoadedFilesToKeepChanged();
 }

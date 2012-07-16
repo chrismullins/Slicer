@@ -138,6 +138,9 @@ protected:
 private:
   Q_DECLARE_PRIVATE(qSlicerCoreIOManager);
   Q_DISABLE_COPY(qSlicerCoreIOManager);
+
+signals:
+  void newFileLoaded();
 };
 
 #endif
