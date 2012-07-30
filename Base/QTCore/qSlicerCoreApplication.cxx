@@ -21,6 +21,7 @@
 // Qt includes
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QMessageBox>
 #include <QTimer>
 #include <QNetworkProxyFactory>
@@ -864,22 +865,6 @@ void qSlicerCoreApplication::handleCommandLineArguments()
       }
     }
 #endif
-  QStringList unparsedArguments = options->unparsedArguments();
-  if (unparsedArguments.length() > 0)
-    {
-    foreach(QString fileName, unparsedArguments)
-      {
-      QFileInfo file(fileName);
-      if (file.exists())
-        {
-        qSlicerCoreIOManager* ioManager =this->coreIOManager();
-        qSlicerIO::IOFileType fileType = ioManager->fileType(fileName);
-        qSlicerIO::IOProperties fileProperties;
-        fileProperties.insert("fileName", fileName);
-        ioManager->loadNodes(fileType, fileProperties);
-        }
-      }
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -1208,6 +1193,12 @@ qSlicerCoreCommandOptions* qSlicerCoreApplication::coreCommandOptions()const
 {
   Q_D(const qSlicerCoreApplication);
   return d->CoreCommandOptions.data();
+}
+
+//-----------------------------------------------------------------------------
+QStringList qSlicerCoreApplication::unparsedArguments()const
+{
+  return this->coreCommandOptions()->unparsedArguments();
 }
 
 //-----------------------------------------------------------------------------

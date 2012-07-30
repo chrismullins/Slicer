@@ -21,6 +21,7 @@
 // Qt includes
 #include <QAction>
 #include <QDebug>
+#include <QDirIterator>
 #include <QMainWindow>
 
 #include "vtkSlicerConfigure.h" // For Slicer_USE_QtTesting
@@ -42,6 +43,7 @@
 #include "qSlicerApplication.h"
 #include "qSlicerCommandOptions.h"
 #include "qSlicerCoreApplication_p.h"
+#include "qSlicerDataDialog.h"
 #include "qSlicerIOManager.h"
 #include "qSlicerLayoutManager.h"
 #include "qSlicerModuleManager.h"
@@ -373,6 +375,58 @@ void qSlicerApplication::handleCommandLineArguments()
     }
 
   this->Superclass::handleCommandLineArguments();
+  QStringList unparsedArguments = qSlicerCoreApplication::unparsedArguments();
+  // Figure out which of the unparsedArguments are file paths.
+  // This should sieve out the other arguments and nonexistant files.
+  QStringList filePaths;
+  foreach (QString arg, unparsedArguments)
+    {
+    QFileInfo potentialFile(arg);
+    if (potentialFile.exists())
+      {
+      filePaths.append(arg);
+      }
+    }
+
+  if (filePaths.length() > 0)
+    {
+    QStringList filesToLoad;
+    qSlicerDataDialog* dataDialog;
+    qSlicerIO::IOProperties fileProperties;
+    qSlicerCoreIOManager* ioManager = this->coreIOManager();
+    qSlicerIO::IOFileType firstFileType = ioManager->fileType(filePaths.first());
+    if (filePaths.length() == 1 && firstFileType == "SceneFile")
+      {
+      qDebug() << "Loading scene file: " << filePaths.first();
+      ioManager->loadScene(filePaths.first());
+      }
+    else
+      {
+      dataDialog = new qSlicerDataDialog();
+      foreach (QString path, filePaths)
+        {
+        QFileInfo file(path);
+        if (file.exists())
+          {
+          if (!file.isDir())
+            {
+            filesToLoad.append(path);
+            }
+          else
+            {
+            QDirIterator it(QDir(path), QDirIterator::Subdirectories);
+            while (it.hasNext())
+              {
+              QString fileToLoad = it.next();
+              filesToLoad.append(fileToLoad);
+              }
+            }
+          }
+        }
+        fileProperties.insert("fileNames", filesToLoad);
+        dataDialog->exec(fileProperties);
+      }
+    }
 
   this->setToolTipsEnabled(!options->disableToolTips());
 }

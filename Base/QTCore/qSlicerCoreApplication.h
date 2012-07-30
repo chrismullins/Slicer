@@ -215,6 +215,9 @@ public:
   /// Get coreCommandOptions
   qSlicerCoreCommandOptions* coreCommandOptions()const;
 
+  /// Get unparsedArguments
+  QStringList unparsedArguments()const;
+
   /// Set coreCommandOptions
   /// \note qSlicerCoreApplication takes ownership of the object
   void setCoreCommandOptions(qSlicerCoreCommandOptions* options);
