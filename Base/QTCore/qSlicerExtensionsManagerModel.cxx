@@ -417,8 +417,11 @@ void qSlicerExtensionsManagerModelPrivate::addExtensionPathToApplicationSettings
 
 #ifdef Q_OS_MAC
   QStringList additionalPythonPaths = QSettings().value("Python/AdditionalPythonPaths").toStringList();
-  QSettings().setValue("Python/AdditionalPythonPaths",
-                       appendToPathList(additionalPythonPaths, this->extensionPythonPaths(extensionName)));
+  QStringList pythonPathsToAppend = appendToPathList(additionalPythonPaths(extensionName));
+  QSettings().setValue("Python/AdditionalPythonPaths", pythonPathsToAppend);
+  QStringList moduleAdditionalPaths = QSettings().value("Modules/AdditionalPaths").toStringList();
+  QStringList modulePathsToAppend = appendToPathList(moduleAdditionalPaths, pythonPathsToAppend);
+  QSettings().setValue("Modules/AdditionalPaths", modulePathsToAppend);
 #endif
 }
 
