@@ -70,7 +70,7 @@ public:
   /// 
   /// Set/Get TypeOfTransform
   /// By default, the selector coordinate system will be set to TRANSLATION
-  enum TransformType { ROTATION, TRANSLATION };
+  enum TransformType { SCALE, ROTATION, TRANSLATION };
   void setTypeOfTransform(TransformType typeOfTransform);
   TransformType typeOfTransform() const;
 
